@@ -1,10 +1,9 @@
 
-# An inventory website named '' Backend
+# An  website named '' Backend
 
 
 ## About this project
 
-This project make for manage Inventory website's 'named HIBISCUS' backend and make for an Assignment. I try to make this site simple use node, express, mongodb, cors, express-fileupload, jsonwebtoken.
 
 ## Features
 

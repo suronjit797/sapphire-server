@@ -30,13 +30,38 @@ const jwtVerify = async (req, res, next) => {
     })
 }
 
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.bupbu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-// const inventoryCollection = client.db("inventory").collection("products");
+const productsCollection = client.db("sapphire").collection("products");
 // const blogCollection = client.db("inventory").collection("blog");
 
 async function run() {
-    try{
+    try {
+        await client.connect()
+        console.log('database connected....')
+
+        app.get('/products', async (req, res) => {
+            const result = await productsCollection.find().toArray()
+            res.send(result)
+        })
+        app.post('/products', async (req, res) => {
+            const { name, price, quantity, date, email, image } = req.body
+
+            const addProduct = {
+                name,
+                price: parseInt(price),
+                quantity: parseInt(quantity),
+                date,
+                email,
+                image
+            }
+
+            const result = await productsCollection.insertOne(addProduct)
+            res.send(result)
+            console.log(result);
+
+        })
 
     }
     finally {
