@@ -95,7 +95,7 @@ async function run() {
         //past a single user data
         app.get('/user', jwtVerify, async (req, res) => {
             const { email } = req.decoded
-            const result = await userCollection.findOne({email})
+            const result = await userCollection.findOne({ email })
             res.send(result)
         })
 
@@ -114,7 +114,9 @@ async function run() {
 
         // get all products
         app.get('/products', async (req, res) => {
-            const result = await productsCollection.find().toArray()
+            const limit = req.query.limit || 100
+            const skip = req.query.skip || 0
+            const result = await productsCollection.find().limit(parseInt(limit)).skip(parseInt(skip)).toArray()
             res.send(result)
         })
 
