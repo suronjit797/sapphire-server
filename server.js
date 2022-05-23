@@ -41,27 +41,53 @@ async function run() {
         await client.connect()
         console.log('database connected....')
 
+        // get all products
         app.get('/products', async (req, res) => {
             const result = await productsCollection.find().toArray()
             res.send(result)
         })
-        app.post('/products', async (req, res) => {
-            const { name, price, quantity, date, email, image } = req.body
 
+        // get single products
+        app.get('/product/:id', async (req, res) => {
+            const id = req.params.id
+            const result = await productsCollection.find({ _id: ObjectId(id) }).toArray()
+            res.send(result)
+        })
+
+        // post a product
+        app.post('/product', async (req, res) => {
+            const { name, price, quantity, date, email, image } = req.body
             const addProduct = {
                 name,
                 price: parseInt(price),
                 quantity: parseInt(quantity),
                 date,
                 email,
-                image
+                image,
+                rating: 0,
+                totalRating: 0,
             }
-
             const result = await productsCollection.insertOne(addProduct)
             res.send(result)
-            console.log(result);
-
         })
+
+        // remove a product 
+        app.delete('/product/:id', async (req, res) => {
+            const id = req.params.id
+            const result = await productsCollection.deleteOne({ _id: ObjectId(id) })
+            res.send(result)
+        })
+
+
+
+
+
+
+
+
+
+
+
 
     }
     finally {
