@@ -49,13 +49,22 @@ async function run() {
         app.post('/token', async (req, res) => {
             const { email } = req.body
             const result = await emailCollection.findOne({ email })
+            console.log(result);
             const payload = {
                 name: result.name,
                 email,
                 role: result.role
             }
-            const token = jwt.sign(payload, process.env.TOKEN_SECRET);
-            res.send({token})
+            const token = jwt.sign(payload, process.env.TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ token })
+        })
+
+        app.get('/jwt-verify', jwtVerify, async (req, res) => {
+            const decoded = req.decoded
+            res.send(decoded)
+
         })
 
         // save user info in data base
