@@ -34,12 +34,24 @@ const jwtVerify = async (req, res, next) => {
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.bupbu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const productsCollection = client.db("sapphire").collection("products");
-// const blogCollection = client.db("inventory").collection("blog");
+const emailCollection = client.db("sapphire").collection("email");
+// const blogCollection = client.db("sapphire").collection("blog");
 
 async function run() {
     try {
         await client.connect()
         console.log('database connected....')
+
+        // save user info in data base
+        app.put('/register', async (req, res) => {
+            const email = req.body.email
+            console.log(email)
+            const filter = { email }
+            const updated = { $set: { email, role: 'user' } }
+            const result = await emailCollection.updateOne(filter, updated, { upsert: true })
+            res.send(result)
+        })
+
 
         // get all products
         app.get('/products', async (req, res) => {
