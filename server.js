@@ -34,6 +34,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const productsCollection = client.db("sapphire").collection("products");
 const emailCollection = client.db("sapphire").collection("email");
+const userCollection = client.db("sapphire").collection("user");
 // const blogCollection = client.db("sapphire").collection("blog");
 
 async function run() {
@@ -49,7 +50,6 @@ async function run() {
         app.post('/token', async (req, res) => {
             const { email } = req.body
             const result = await emailCollection.findOne({ email })
-            console.log(result);
             const payload = {
                 name: result.name,
                 email,
@@ -68,22 +68,39 @@ async function run() {
         })
 
         // save user info in data base
-        app.put('/register', async (req, res) => {
+        app.put('/users', async (req, res) => {
             const { email, name } = req.body
             const filter = { email }
+            console.log(req.body);
             const updated = { $set: { name, email, role: 'user' } }
             const result = await emailCollection.updateOne(filter, updated, { upsert: true })
             res.send(result)
         })
 
         //get all user
-        app.get('/register', async (req, res) => {
+        app.get('/users', async (req, res) => {
             const result = await emailCollection.find().toArray()
+            res.send(result)
+        })
+        //past a single user
+        app.post('/user', jwtVerify, async (req, res) => {
+            const { email } = req.decoded
+            const data = req.body
+            data.email = email
+            const filter = { email }
+            const updated = { $set: data }
+            const result = await userCollection.updateOne(filter, updated, { upsert: true })
+            res.send(result)
+        })
+        //past a single user data
+        app.get('/user', jwtVerify, async (req, res) => {
+            const { email } = req.decoded
+            const result = await userCollection.findOne({email})
             res.send(result)
         })
 
         // remove a user
-        app.delete('/register/:id', async (req, res) => {
+        app.delete('/users/:id', async (req, res) => {
             const id = req.params.id
             const result = await emailCollection.deleteOne({ _id: ObjectId(id) })
             res.send(result)
