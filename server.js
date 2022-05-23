@@ -52,6 +52,12 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/register', async (req, res) => {
+            const result = await emailCollection.find().toArray()
+            res.send(result)
+        })
+
+
 
         // get all products
         app.get('/products', async (req, res) => {
