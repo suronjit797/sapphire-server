@@ -42,21 +42,36 @@ async function run() {
         await client.connect()
         console.log('database connected....')
 
+        /************************************
+        ************ user ******************* 
+        *************************************/
+
         // save user info in data base
         app.put('/register', async (req, res) => {
-            const email = req.body.email
-            console.log(email)
+            const { email, name } = req.body
             const filter = { email }
-            const updated = { $set: { email, role: 'user' } }
+            const updated = { $set: { name, email, role: 'user' } }
             const result = await emailCollection.updateOne(filter, updated, { upsert: true })
             res.send(result)
         })
 
+        //get all user
         app.get('/register', async (req, res) => {
             const result = await emailCollection.find().toArray()
             res.send(result)
         })
 
+        // remove a user
+        app.delete('/register/:id', async (req, res) => {
+            const id = req.params.id
+            const result = await emailCollection.deleteOne({ _id: ObjectId(id) })
+            res.send(result)
+        })
+
+
+        /************************************
+        ************ products *************** 
+        *************************************/
 
 
         // get all products
