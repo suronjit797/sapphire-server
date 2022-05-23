@@ -4,7 +4,6 @@ require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const fileupload = require('express-fileupload');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -45,6 +44,19 @@ async function run() {
         /************************************
         ************ user ******************* 
         *************************************/
+
+        // make JsonWebTokenError
+        app.post('/token', async (req, res) => {
+            const { email } = req.body
+            const result = await emailCollection.findOne({ email })
+            const payload = {
+                name: result.name,
+                email,
+                role: result.role
+            }
+            const token = jwt.sign(payload, process.env.TOKEN_SECRET);
+            res.send({token})
+        })
 
         // save user info in data base
         app.put('/register', async (req, res) => {
