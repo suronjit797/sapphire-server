@@ -123,13 +123,13 @@ async function run() {
         // get single products
         app.get('/product/:id', async (req, res) => {
             const id = req.params.id
-            const result = await productsCollection.find({ _id: ObjectId(id) }).toArray()
+            const result = await productsCollection.findOne({ _id: ObjectId(id) })
             res.send(result)
         })
 
         // post a product
         app.post('/product', async (req, res) => {
-            const { name, price, quantity, date, email, image } = req.body
+            const { name, price, quantity, date, email, image, limit, description } = req.body
             const addProduct = {
                 name,
                 price: parseInt(price),
@@ -139,6 +139,8 @@ async function run() {
                 image,
                 rating: 0,
                 totalRating: 0,
+                limit,
+                description
             }
             const result = await productsCollection.insertOne(addProduct)
             res.send(result)
