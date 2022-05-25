@@ -142,7 +142,7 @@ async function run() {
                 rating: 0,
                 totalRating: 0,
                 limit,
-                description
+                description,
             }
             const result = await productsCollection.insertOne(addProduct)
             res.send(result)
@@ -155,12 +155,21 @@ async function run() {
             res.send(result)
         })
 
+        // update a order quantity
+        app.put('/product/:id', async (req, res) => {
+            const { id } = req.params
+            const { quantity } = req.body
+            const filter = { _id: ObjectId(id) }
+            const updated = { $set: { quantity: parseInt(quantity) } }
+            const result = await productsCollection.updateOne(filter, updated, { upsert: true })
+            res.send(result)
+        })
 
 
 
 
         /************************************
-        ************ products *************** 
+        ************ order *************** 
         *************************************/
 
 
@@ -203,7 +212,8 @@ async function run() {
                 orderQuantity,
                 orderPrice,
                 delivered: false,
-                productName: product.name
+                productName: product.name,
+                paid: false
             })
             res.send({ productUpdate, orderAdd })
         })
@@ -213,14 +223,21 @@ async function run() {
             const { id } = req.params
             const filter = { _id: ObjectId(id) }
             const updated = { $set: { delivered: true } }
-            const result = await orderCollection.updateOne(filter, updated, {upsert: true})
+            const result = await orderCollection.updateOne(filter, updated, { upsert: true })
+            res.send(result)
+        })
+
+        // remove a order 
+        app.delete('/order/:id', async (req, res) => {
+            const { id } = req.params
+            const filter = { _id: ObjectId(id) }
+            const result = await orderCollection.deleteOne(filter)
             res.send(result)
         })
 
 
 
         // payment
-
         app.post('/payment-intent', async (req, res) => {
             const { price } = req.body
             const amount = parseFloat(price) * 100;
@@ -228,7 +245,6 @@ async function run() {
                 amount: parseInt(amount),
                 currency: "usd",
                 payment_method_types: ['card']
-
             });
             res.send({ clientSecret: paymentIntent.client_secret })
         })
