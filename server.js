@@ -165,29 +165,47 @@ async function run() {
 
 
         // get all order
-        app.get('/orders',  async (req, res) =>{
+        app.get('/orders', async (req, res) => {
             const result = await orderCollection.find().toArray()
             res.send(result)
         })
         // get single order
-        app.get('/order/:id',  async (req, res) =>{            
+        app.get('/order/:id', async (req, res) => {
             const { id } = req.params
             const filter = { _id: ObjectId(id) }
             const result = await orderCollection.findOne(filter)
             res.send(result)
         })
 
-       // post a orders
+        // get user all order
+        app.get('/user-order', jwtVerify, async (req, res) => {
+            const email = req.decoded.email
+            const filter = { email }
+            const result = await orderCollection.find(filter).toArray()
+            res.send(result)
+        })
+
+        // post a orders
         app.post('/order/:id', async (req, res) => {
             const { id } = req.params
             const filter = { _id: ObjectId(id) }
             const { userName, email, phone, address, orderQuantity, orderPrice } = req.body.newOrder
+            // find product
             const product = await productsCollection.findOne(filter)
             const updatedQuantity = product.quantity - orderQuantity
             const updated = { $set: { quantity: updatedQuantity } }
             const productUpdate = await productsCollection.updateOne(filter, updated, { upsert: true })
-            const orderAdd = await orderCollection.insertOne({ userName, email, phone, address, orderQuantity, orderPrice })
-            res.send({productUpdate, orderAdd})
+            const orderAdd = await orderCollection.insertOne({
+                userName,
+                email,
+                phone,
+                address,
+                orderQuantity,
+                orderPrice,
+                delivered: false,
+                productName: product.name
+            })
+            res.send({ productUpdate, orderAdd })
         })
 
 
