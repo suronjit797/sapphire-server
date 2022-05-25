@@ -4,7 +4,7 @@ require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const fileupload = require('express-fileupload');
 const jwt = require('jsonwebtoken');
-const stripe = require("stripe")('pk_test_51L2xACGDwhQzJu6wWcWF0eTNpLTfoiILBu0oaxxhPIa7Qq1A5XDRbOht4Z5T6BXxkjnQHqBrji7dhWLCpBw1Ghc000WTiwtXIr');
+const stripe = require("stripe")('sk_test_51L2xACGDwhQzJu6wXYGzxZB1GqddIUG9eW1Lq42Ijeg3ONSJLBxyatCmT7LwzxwZUG0ioeLAGvGvOfkg9JzKUAru00zvsmP1R6');
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -93,7 +93,7 @@ async function run() {
             const result = await userCollection.updateOne(filter, updated, { upsert: true })
             res.send(result)
         })
-        //past a single user data
+        //get a single user data
         app.get('/user', jwtVerify, async (req, res) => {
             const { email } = req.decoded
             const result = await userCollection.findOne({ email })
@@ -174,7 +174,7 @@ async function run() {
             const amount = parseFloat(price) * 100;
 
             const paymentIntent = await stripe.paymentIntents.create({
-                amount: amount.toFixed(2),
+                amount: parseInt(amount),
                 currency: "usd",
                 payment_method_types: ['card']
 
