@@ -36,6 +36,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 const productsCollection = client.db("sapphire").collection("products");
 const emailCollection = client.db("sapphire").collection("email");
 const userCollection = client.db("sapphire").collection("user");
+const orderCollection = client.db("sapphire").collection("order");
 // const blogCollection = client.db("sapphire").collection("blog");
 
 async function run() {
@@ -162,14 +163,38 @@ async function run() {
         ************ products *************** 
         *************************************/
 
-        app.post('/order', async (req, res) => {
-            const order = req.body
-            console.log(order);
+
+        // get all order
+        app.get('/orders',  async (req, res) =>{
+            const result = await orderCollection.find().toArray()
+            res.send(result)
         })
+        // get single order
+        app.get('/order/:id',  async (req, res) =>{            
+            const { id } = req.params
+            const filter = { _id: ObjectId(id) }
+            const result = await orderCollection.findOne(filter)
+            res.send(result)
+        })
+
+       // post a orders
+        app.post('/order/:id', async (req, res) => {
+            const { id } = req.params
+            const filter = { _id: ObjectId(id) }
+            const { userName, email, phone, address, orderQuantity, orderPrice } = req.body.newOrder
+            const product = await productsCollection.findOne(filter)
+            const updatedQuantity = product.quantity - orderQuantity
+            const updated = { $set: { quantity: updatedQuantity } }
+            const productUpdate = await productsCollection.updateOne(filter, updated, { upsert: true })
+            const orderAdd = await orderCollection.insertOne({ userName, email, phone, address, orderQuantity, orderPrice })
+            res.send({productUpdate, orderAdd})
+        })
+
+
 
         // payment
 
-        app.post('/payment-intent',  async (req, res) => {
+        app.post('/payment-intent', async (req, res) => {
             const { price } = req.body
             const amount = parseFloat(price) * 100;
 
