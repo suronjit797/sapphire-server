@@ -4,6 +4,7 @@ require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const fileupload = require('express-fileupload');
 const jwt = require('jsonwebtoken');
+const stripe = require("stripe")('pk_test_51L2xACGDwhQzJu6wWcWF0eTNpLTfoiILBu0oaxxhPIa7Qq1A5XDRbOht4Z5T6BXxkjnQHqBrji7dhWLCpBw1Ghc000WTiwtXIr');
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -154,6 +155,32 @@ async function run() {
         })
 
 
+
+
+
+        /************************************
+        ************ products *************** 
+        *************************************/
+
+        app.post('/order', async (req, res) => {
+            const order = req.body
+            console.log(order);
+        })
+
+        // payment
+
+        app.post('/payment-intent',  async (req, res) => {
+            const { price } = req.body
+            const amount = parseFloat(price) * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount.toFixed(2),
+                currency: "usd",
+                payment_method_types: ['card']
+
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+        })
 
 
 
