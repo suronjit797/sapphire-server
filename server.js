@@ -208,6 +208,15 @@ async function run() {
             res.send({ productUpdate, orderAdd })
         })
 
+        // update a order 
+        app.put('/order/:id', async (req, res) => {
+            const { id } = req.params
+            const filter = { _id: ObjectId(id) }
+            const updated = { $set: { delivered: true } }
+            const result = await orderCollection.updateOne(filter, updated, {upsert: true})
+            res.send(result)
+        })
+
 
 
         // payment
@@ -215,7 +224,6 @@ async function run() {
         app.post('/payment-intent', async (req, res) => {
             const { price } = req.body
             const amount = parseFloat(price) * 100;
-
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: parseInt(amount),
                 currency: "usd",
