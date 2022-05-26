@@ -37,6 +37,7 @@ const productsCollection = client.db("sapphire").collection("products");
 const emailCollection = client.db("sapphire").collection("email");
 const userCollection = client.db("sapphire").collection("user");
 const orderCollection = client.db("sapphire").collection("order");
+const reviewCollection = client.db("sapphire").collection("review");
 // const blogCollection = client.db("sapphire").collection("blog");
 
 async function run() {
@@ -65,9 +66,9 @@ async function run() {
 
         app.put('/make-admin', async (req, res) => {
             const { email } = req.body
-            const filter = {email}
-            const update = {$set:{role: 'admin'}}
-            const result = await emailCollection.updateOne(filter, update, {upsert: true})            
+            const filter = { email }
+            const update = { $set: { role: 'admin' } }
+            const result = await emailCollection.updateOne(filter, update, { upsert: true })
             res.send({ result })
         })
 
@@ -172,6 +173,15 @@ async function run() {
             const result = await productsCollection.updateOne(filter, updated, { upsert: true })
             res.send(result)
         })
+        // update a product review
+        app.put('/product/:id', async (req, res) => {
+            const { id } = req.params
+            const { review } = req.body
+            const filter = { _id: ObjectId(id) }
+            const updated = { $set: { review } }
+            const result = await productsCollection.updateOne(filter, updated, { upsert: true })
+            res.send(result)
+        })
 
 
 
@@ -234,6 +244,14 @@ async function run() {
             const result = await orderCollection.updateOne(filter, updated, { upsert: true })
             res.send(result)
         })
+        // update a order -payment
+        app.put('/order-pay/:id', async (req, res) => {
+            const { id } = req.params
+            const filter = { _id: ObjectId(id) }
+            const updated = { $set: { paid: true } }
+            const result = await orderCollection.updateOne(filter, updated, { upsert: true })
+            res.send(result)
+        })
 
         // remove a order 
         app.delete('/order/:id', async (req, res) => {
@@ -248,6 +266,9 @@ async function run() {
         // payment
         app.post('/payment-intent', async (req, res) => {
             const { price } = req.body
+            if (price > 999999) {
+                return res.status(501).send({ message: 'Amount must be no more than $999,999.99' })
+            }
             const amount = parseFloat(price) * 100;
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: parseInt(amount),
@@ -257,6 +278,36 @@ async function run() {
             res.send({ clientSecret: paymentIntent.client_secret })
         })
 
+        /************************************
+        ************ review *************** 
+        *************************************/
+
+        // get all review
+        app.get('/review', async (req, res) => {
+            const result = await reviewCollection.find().toArray()
+            res.send(result)
+        })
+
+        // post a review
+        app.post('/review', async (req, res) => {
+            const review = req.body
+            const result = await reviewCollection.insertOne(review)
+            res.send(result)
+        })
+
+        // remove a review
+        app.get('/review/:id', async (req, res) => {
+            const id = req.params.id
+            const result = await reviewCollection.deleteOne({ _id: ObjectId(id) })
+            res.send(result)
+        })
+
+        // get a review
+        app.get('/review/:id', async (req, res) => {
+            const id = req.params.id
+            const result = await reviewCollection.find({ _id: ObjectId(id) })
+            res.send(result)
+        })
 
 
 
