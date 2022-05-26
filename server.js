@@ -63,10 +63,18 @@ async function run() {
             res.send({ token })
         })
 
+        app.put('/make-admin', async (req, res) => {
+            const { email } = req.body
+            const filter = {email}
+            const update = {$set:{role: 'admin'}}
+            const result = await emailCollection.updateOne(filter, update, {upsert: true})            
+            res.send({ result })
+        })
+
+
         app.get('/jwt-verify', jwtVerify, async (req, res) => {
             const decoded = req.decoded
             res.send(decoded)
-
         })
 
         // save user info in data base
@@ -74,7 +82,7 @@ async function run() {
             const { email, name } = req.body
             const filter = { email }
             console.log(req.body);
-            const updated = { $set: { name, email, role: 'user' } }
+            const updated = { $set: { name, email } }
             const result = await emailCollection.updateOne(filter, updated, { upsert: true })
             res.send(result)
         })
