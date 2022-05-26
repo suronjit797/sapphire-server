@@ -152,6 +152,7 @@ async function run() {
                 totalRating: 0,
                 limit,
                 description,
+                review: []
             }
             const result = await productsCollection.insertOne(addProduct)
             res.send(result)
@@ -174,11 +175,11 @@ async function run() {
             res.send(result)
         })
         // update a product review
-        app.put('/product/:id', async (req, res) => {
+        app.put('/product-review/:id', async (req, res) => {
             const { id } = req.params
-            const { review } = req.body
+            const review = req.body
             const filter = { _id: ObjectId(id) }
-            const updated = { $set: { review } }
+            const updated = { $push: { review: review } }
             const result = await productsCollection.updateOne(filter, updated, { upsert: true })
             res.send(result)
         })
@@ -284,7 +285,8 @@ async function run() {
 
         // get all review
         app.get('/review', async (req, res) => {
-            const result = await reviewCollection.find().toArray()
+            const limit = parseInt(req.query.limit) || 10
+            const result = await reviewCollection.find().sort({_id: -1}).limit(limit).toArray()
             res.send(result)
         })
 
@@ -312,7 +314,7 @@ async function run() {
 
 
 
-        
+
 
 
 
