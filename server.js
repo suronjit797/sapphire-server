@@ -130,6 +130,13 @@ async function run() {
             const result = await productsCollection.find().limit(parseInt(limit)).skip(parseInt(skip)).toArray()
             res.send(result)
         })
+        // get all products
+        app.get('/recent-products', async (req, res) => {
+            const limit = req.query.limit || 100
+            const skip = req.query.skip || 0
+            const result = await productsCollection.find().sort({ _id: -1 }).limit(parseInt(limit)).skip(parseInt(skip)).toArray()
+            res.send(result)
+        })
 
         // get single products
         app.get('/product/:id', async (req, res) => {
@@ -286,7 +293,7 @@ async function run() {
         // get all review
         app.get('/review', async (req, res) => {
             const limit = parseInt(req.query.limit) || 10
-            const result = await reviewCollection.find().sort({_id: -1}).limit(limit).toArray()
+            const result = await reviewCollection.find().sort({ _id: -1 }).limit(limit).toArray()
             res.send(result)
         })
 
@@ -310,12 +317,6 @@ async function run() {
             const result = await reviewCollection.find({ _id: ObjectId(id) })
             res.send(result)
         })
-
-
-
-
-
-
 
 
 
