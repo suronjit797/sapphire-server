@@ -224,7 +224,7 @@ async function run() {
         app.post('/order/:id', async (req, res) => {
             const { id } = req.params
             const filter = { _id: ObjectId(id) }
-            const { userName, email, phone, address, orderQuantity, orderPrice } = req.body.newOrder
+            const { userName, email, phone, address, orderQuantity, orderPrice, productId } = req.body.newOrder
             // find product
             const product = await productsCollection.findOne(filter)
             const updatedQuantity = product.quantity - orderQuantity
@@ -239,7 +239,8 @@ async function run() {
                 orderPrice,
                 delivered: false,
                 productName: product.name,
-                paid: false
+                paid: false,
+                productId
             })
             res.send({ productUpdate, orderAdd })
         })
@@ -265,8 +266,9 @@ async function run() {
         app.delete('/order/:id', async (req, res) => {
             const { id } = req.params
             const filter = { _id: ObjectId(id) }
+            const product = await orderCollection.findOne(filter)
             const result = await orderCollection.deleteOne(filter)
-            res.send(result)
+            res.send({result, product})
         })
 
 
